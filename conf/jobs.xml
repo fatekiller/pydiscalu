@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jobs>
+    <job type="sum" >
+        <datasource type="mysql">
+            <property type="String" name="username" value="root" />
+            <property type="String" name="password" value="cloudsea123" />
+            <property type="String" name="url" value="jdbc:mysql://localhost:3306?database=pydiscalu"/>
+        </datasource>
+        <sql>select sum(trade_num) from sale where purchase_date between 2017-01-01 and 2017-12-31</sql>
+    </job>
+    <job type="sum" >
+        <datasource type="mysql">
+            <property type="String" name="username" value="root" />
+            <property type="String" name="password" value="cloudsea123" />
+            <property type="String" name="url" value="jdbc:mysql://localhost:3306?database=pydiscalu"/>
+        </datasource>
+        <sql>select sum(trade_num) from sale where trade_sum > 100</sql>
+    </job>
+</jobs>
