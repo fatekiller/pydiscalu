@@ -36,6 +36,7 @@ class MyHandler(ContentHandler):
         if name == "worker":
             worker = Worker()
             worker.set_address(attrs["address"])
+            worker.set_address(attrs["port"])
             current_workers.append(worker)
 
     def endElement(self, name):
