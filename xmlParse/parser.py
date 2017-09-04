@@ -1,7 +1,6 @@
 from xml.sax.handler import ContentHandler
 from xml.sax import parse
-from model.Job import Job
-from model.Job import JobDataSource
+from model.Job import Job, JobDataSource, Prop
 from model.Worker import Worker
 
 current_jobs = []
@@ -28,7 +27,7 @@ class MyHandler(ContentHandler):
             ds.set_type(attrs["type"])
             current_job.set_ds(ds)
         if name == "property":
-            prop = Job.Prop()
+            prop = Prop()
             prop.set_name(attrs["name"])
             prop.set_value(attrs["value"])
             prop.set_type(attrs["type"])
@@ -36,7 +35,7 @@ class MyHandler(ContentHandler):
         if name == "worker":
             worker = Worker()
             worker.set_address(attrs["address"])
-            worker.set_address(attrs["port"])
+            worker.set_port(attrs["port"])
             current_workers.append(worker)
 
     def endElement(self, name):

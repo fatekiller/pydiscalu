@@ -4,16 +4,16 @@
         <datasource type="mysql">
             <property type="String" name="username" value="root" />
             <property type="String" name="password" value="cloudsea123" />
-            <property type="String" name="url" value="jdbc:mysql://localhost:3306?database=pydiscalu"/>
+            <property type="String" name="url" value="jdbc:mysql://localhost:3306?database=pydistcalu"/>
         </datasource>
-        <sql>select sum(trade_num) from sale where purchase_date between 2017-01-01 and 2017-12-31</sql>
+        <sql>select sum(trade_sum) from sale where date between '2017-01-01' and '2017-12-31'</sql>
     </job>
     <job type="sum" >
         <datasource type="mysql">
             <property type="String" name="username" value="root" />
             <property type="String" name="password" value="cloudsea123" />
-            <property type="String" name="url" value="jdbc:mysql://localhost:3306?database=pydiscalu"/>
+            <property type="String" name="url" value="jdbc:mysql://localhost:3306?database=pydistcalu"/>
         </datasource>
-        <sql>select sum(trade_num) from sale where trade_sum > 100</sql>
+        <sql>select sum(trade_sum) from sale where trade_sum > 100</sql>
     </job>
 </jobs>

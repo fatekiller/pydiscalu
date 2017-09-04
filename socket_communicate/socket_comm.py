@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*-
 import socket
 import threading as tr
+from util.utils import json2obj, obj2json
 
 sockets = dict()
 
@@ -12,14 +13,11 @@ def __receive_msg__(s, call):
         if data:
             buffer_msg.append(data)
             if data.__contains__(':end'):
-                call(s, ''.join(buffer_msg)[0:-4])
+                call(s, ''.join(buffer_msg))
                 buffer_msg = []
             else:
                 continue
 
-
-def wrap_msg(msg):
-    return msg+":end"
 
 
 '''
@@ -30,19 +28,16 @@ on_reply:接收回调
 '''
 
 
-def send_msg(msg, address, port, on_reply=None):
+def init_socket(msg, address, port=0000, on_reply=None):
     s = None
 
     def server_receive():
         __receive_msg__(s, on_reply)
-
-    if address in sockets:
-        s = sockets.get(address)
-    else:
-        s = socket.socket()
-        s.connect((address, port))
-        tr.Thread(target=server_receive, name=address).start()
-    s.send(wrap_msg(msg))
+    s = socket.socket()
+    s.connect((address, int(port)))
+    # 开始一个这个socket的消息监听线程
+    tr.Thread(target=server_receive, name=address).start()
+    s.send(msg)
 
 '''
 为worker初始化一个socket并监听上面的消息
@@ -64,3 +59,44 @@ def worker_init(on_receive, ip, port, on_conn):
             on_conn(server, address)
             __receive_msg__(server, on_receive)
     tr.Thread(target=worker_receive()).start()
+
+
+'''
+msg_type 0:master连接worker发送hello校验连接状态
+msg_type 1:worker确认连接成功建立，发送connected
+msg_type 2:master发送job给worker
+msg_type 3:worker发送job结果给master
+msg_type 4:worker接收完任务的反馈
+
+status 0:成功消息 默认值
+status 1:错误报告消息
+
+'''
+
+
+class Msg(object):
+    MSG_HELLO = 0
+    MSG_CONNECTED = 1
+    MSG_JOB = 2
+    MSG_RESULT = 3
+    MSG_JOB_REPLY = 4
+
+    STATUS_SUCCESS = 0
+    STATUS_ERROR = 1
+
+    def __init__(self, msg_type=None, content=None, status=STATUS_SUCCESS):
+        self.msg_type = msg_type
+        self.content = content
+        self.status = status
+
+    @staticmethod
+    def get_msg(json_str):
+        def json_load_hook(d):
+            print "resolve:"
+            print d
+            mm=type(d)
+            return Msg(int(d["msg_type"]), d["content"], int(d["status"]))
+        return json2obj(json_str[0:-4], json_load_hook)
+
+    def get_json_msg(self):
+        return obj2json(self)+':end'

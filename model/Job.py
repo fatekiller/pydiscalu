@@ -1,3 +1,4 @@
+# -*-coding:utf-8 -*-
 class Job(object):
     def __init__(self, ds=None, sql=None, job_type=None):
         self.ds = ds
@@ -12,6 +13,11 @@ class Job(object):
 
     def set_type(self, job_type):
         self.job_type = job_type
+
+    @staticmethod
+    def json_job_hook(d):
+        # todo 编写hook函数
+        return Job(d[0])
 
 
 class JobDataSource(object):
