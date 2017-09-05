@@ -15,7 +15,7 @@ def reply_gen(exe_job):
             if msg.msg_type == Msg.MSG_CONNECTED:
                 s.send(Msg(Msg.MSG_JOB, exe_job).get_json_msg())
             if msg.msg_type == Msg.MSG_RESULT:
-                print Msg.get_msg(msg).content
+                print msg.content
                 # s.send(Msg(Msg.MSG_JOB, exe_job).get_json_msg())
     return on_reply
 

@@ -91,12 +91,7 @@ class Msg(object):
 
     @staticmethod
     def get_msg(json_str):
-        def json_load_hook(d):
-            print "resolve:"
-            print d
-            mm=type(d)
-            return Msg(int(d["msg_type"]), d["content"], int(d["status"]))
-        return json2obj(json_str[0:-4], json_load_hook)
+        return json2obj(json_str[0:-4])
 
     def get_json_msg(self):
         return obj2json(self)+':end'

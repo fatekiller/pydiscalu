@@ -11,11 +11,12 @@ jobs_lock = False
 
 
 def on_receive(s, msg):
-    if Msg.get_msg(msg).msg_type == Msg.MSG_HELLO:
+    msg = Msg.get_msg(msg)
+    if msg.msg_type == Msg.MSG_HELLO:
         s.send(Msg(Msg.MSG_CONNECTED, 'connected').get_json_msg())
-    if Msg.get_msg(msg).msg_type == Msg.MSG_JOB:
+    if msg.msg_type == Msg.MSG_JOB:
         try:
-            jobs.put(json2obj(msg.content,hook=Job.json_job_hook))
+            jobs.put(msg.content)
             tr.Thread(target=do_job, name=str(random.randint(0, 1000))).start()
         except Exception as e:
             print e

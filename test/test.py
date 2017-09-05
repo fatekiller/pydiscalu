@@ -34,13 +34,47 @@
 #
 # print json2obj(obj2json(TestClass()))
 from socket_communicate.socket_comm import Msg
-from util.utils import json2obj,obj2json
+from util.utils import json2obj, obj2json
+from model.Job import *
+from xmlParse.parser import *
 
 
 def get_msg(d):
     return Msg(int(d["msg_type"]), d["content"], int(d["status"]))
 
 
-msg = Msg(Msg.MSG_HELLO, "hello", Msg.STATUS_SUCCESS)
-s = obj2json(msg)
-mm = json2obj(s, get_msg)
+class DictObj(object):
+    def __init__(self,map):
+        self.map = map
+
+    def __setattr__(self, name, value):
+        if name == 'map':
+            object.__setattr__(self, name, value)
+            return;
+        print 'set attr called ',name,value
+        self.map[name] = value
+
+    def __getattr__(self,name):
+        v = self.map[name]
+        if isinstance(v,(dict)):
+            return DictObj(v)
+        if isinstance(v, (list)):
+            r = []
+            for i in v:
+                r.append(DictObj(i))
+            return r
+        else:
+            return self.map[name];
+
+    def __getitem__(self,name):
+        return self.map[name]
+
+if __name__ == '__main__':
+    msg = Msg(Msg.MSG_HELLO, "hello", Msg.STATUS_SUCCESS)
+    s = obj2json(msg)
+    mm = json2obj(s, get_msg)
+    jobs = parse_job('../conf/jobs.xml')
+    jobs_json_str=obj2json(jobs)
+    print jobs_json_str
+    jobs_copy = json2obj(jobs_json_str)
+    print jobs_copy
