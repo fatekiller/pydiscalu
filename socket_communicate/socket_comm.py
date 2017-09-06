@@ -14,10 +14,30 @@ def __receive_msg__(s, call):
             buffer_msg.append(data)
             if data.__contains__(':end'):
                 call(s, ''.join(buffer_msg))
-                buffer_msg = []
+                return
             else:
                 continue
 
+
+'''
+一次通信结束不注销监听器
+'''
+
+
+def _receive_msg_no_exit_(s, call, is_alive=None):
+    buffer_msg = []
+    condition = True
+    if is_alive:
+        condition = is_alive()
+    while condition:
+        data = s.recv(512)
+        if data:
+            buffer_msg.append(data)
+            if data.__contains__(':end'):
+                call(s, ''.join(buffer_msg))
+                buffer_msg = []
+            else:
+                continue
 
 
 '''
@@ -28,16 +48,33 @@ on_reply:接收回调
 '''
 
 
-def init_socket(msg, address, port=0000, on_reply=None):
-    s = None
+def init_s_conn(msg, worker, on_reply=None):
+    if worker.address+str(worker.port) in sockets:
+        s = sockets[worker.address+str(worker.port)]
+    else:
+        s = socket.socket()
+        s.connect((worker.address, int(worker.port)))
+    send_http_msg(Conn(on_reply, s), msg)
+
+
+def send_http_msg(conn, msg):
+    conn.conn_socket.send(msg)
 
     def server_receive():
-        __receive_msg__(s, on_reply)
-    s = socket.socket()
-    s.connect((address, int(port)))
-    # 开始一个这个socket的消息监听线程
-    tr.Thread(target=server_receive, name=address).start()
-    s.send(msg)
+        __receive_msg__(conn.conn_socket, conn.on_reply)
+    # 开始一个本次会话的消息监听线程
+    msg_listener = tr.Thread(target=server_receive)
+    msg_listener.start()
+
+
+def send_msg(conn, msg):
+    conn.conn_socket.send(msg)
+
+    def server_receive():
+        _receive_msg_no_exit_(conn.conn_socket, conn.on_reply)
+    # 开始一个本次会话的消息监听线程
+    msg_listener = tr.Thread(target=server_receive)
+    msg_listener.start()
 
 '''
 为worker初始化一个socket并监听上面的消息
@@ -48,17 +85,16 @@ on_conn 连接回调
 '''
 
 
-def worker_init(on_receive, ip, port, on_conn):
+def worker_init(on_receive, ip, port, on_conn, is_alive=None):
     worker_socket = socket.socket()
     worker_socket.bind((ip, port))
     worker_socket.listen(10)
 
     def worker_receive():
-        while True:
-            server, address = worker_socket.accept()
-            on_conn(server, address)
-            __receive_msg__(server, on_receive)
-    tr.Thread(target=worker_receive()).start()
+        server, address = worker_socket.accept()
+        on_conn(server, address)
+        _receive_msg_no_exit_(server, on_receive, is_alive=is_alive)
+    tr.Thread(target=worker_receive).start()
 
 
 '''
@@ -95,3 +131,9 @@ class Msg(object):
 
     def get_json_msg(self):
         return obj2json(self)+':end'
+
+
+class Conn(object):
+    def __init__(self, on_reply=None, conn_socket=None):
+        self.conn_socket = conn_socket
+        self.on_reply = on_reply

@@ -45,4 +45,5 @@ def get_count(sql=""):
     where = m.group(2)
     cursor = conn.cursor()
     cursor.execute("select count(*) from %s %s" % (table, where))
+    conns.put(conn)
     return cursor.fetchone()[0]

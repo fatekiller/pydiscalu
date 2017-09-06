@@ -36,6 +36,7 @@ def obj2json(obj):
 
 
 def json2obj(json_str):
+    # print "json is %s" % json_str
     o = parse_with_type_check(json.loads(json_str))
     return o
 

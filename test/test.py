@@ -33,48 +33,73 @@
 #
 #
 # print json2obj(obj2json(TestClass()))
-from socket_communicate.socket_comm import Msg
-from util.utils import json2obj, obj2json
-from model.Job import *
-from xmlParse.parser import *
+# from socket_communicate.socket_comm import Msg
+# from util.utils import json2obj, obj2json
+# from model.Job import *
+# from xmlParse.parser import *
+#
+#
+# def get_msg(d):
+#     return Msg(int(d["msg_type"]), d["content"], int(d["status"]))
+#
+#
+# class DictObj(object):
+#     def __init__(self,map):
+#         self.map = map
+#
+#     def __setattr__(self, name, value):
+#         if name == 'map':
+#             object.__setattr__(self, name, value)
+#             return;
+#         print 'set attr called ',name,value
+#         self.map[name] = value
+#
+#     def __getattr__(self,name):
+#         v = self.map[name]
+#         if isinstance(v,(dict)):
+#             return DictObj(v)
+#         if isinstance(v, (list)):
+#             r = []
+#             for i in v:
+#                 r.append(DictObj(i))
+#             return r
+#         else:
+#             return self.map[name];
+#
+#     def __getitem__(self,name):
+#         return self.map[name]
+#
+# if __name__ == '__main__':
+#     msg = Msg(Msg.MSG_HELLO, "hello", Msg.STATUS_SUCCESS)
+#     s = obj2json(msg)
+#     mm = json2obj(s, get_msg)
+#     jobs = parse_job('../conf/jobs.xml')
+#     jobs_json_str=obj2json(jobs)
+#     print jobs_json_str
+#     jobs_copy = json2obj(jobs_json_str)
+#     print jobs_copy
+
+import threading as tr
+import time
+
+l = [[1, 2, 3], [4, 5, 6]]
 
 
-def get_msg(d):
-    return Msg(int(d["msg_type"]), d["content"], int(d["status"]))
+def get_run(l_item):
+    print 'begin to execute %s' % (str(l_item))
+
+    def run():
+        print 'begin thread %s' % tr.current_thread()
+        for i in l_item:
+            print i
+            time.sleep(1)
+    return run
 
 
-class DictObj(object):
-    def __init__(self,map):
-        self.map = map
+work_t = None
 
-    def __setattr__(self, name, value):
-        if name == 'map':
-            object.__setattr__(self, name, value)
-            return;
-        print 'set attr called ',name,value
-        self.map[name] = value
-
-    def __getattr__(self,name):
-        v = self.map[name]
-        if isinstance(v,(dict)):
-            return DictObj(v)
-        if isinstance(v, (list)):
-            r = []
-            for i in v:
-                r.append(DictObj(i))
-            return r
-        else:
-            return self.map[name];
-
-    def __getitem__(self,name):
-        return self.map[name]
-
-if __name__ == '__main__':
-    msg = Msg(Msg.MSG_HELLO, "hello", Msg.STATUS_SUCCESS)
-    s = obj2json(msg)
-    mm = json2obj(s, get_msg)
-    jobs = parse_job('../conf/jobs.xml')
-    jobs_json_str=obj2json(jobs)
-    print jobs_json_str
-    jobs_copy = json2obj(jobs_json_str)
-    print jobs_copy
+for item in l:
+    work_t = tr.Thread(target=get_run(item))
+    work_t.start()
+work_t.join()
+print "after start thread"

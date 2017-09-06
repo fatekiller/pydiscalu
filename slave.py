@@ -8,10 +8,12 @@ import random
 master = None
 jobs = Queue.Queue()
 jobs_lock = False
+is_socket_alive = True
 
 
 def on_receive(s, msg):
     msg = Msg.get_msg(msg)
+    print 'msg is %s' % msg
     if msg.msg_type == Msg.MSG_HELLO:
         s.send(Msg(Msg.MSG_CONNECTED, 'connected').get_json_msg())
     if msg.msg_type == Msg.MSG_JOB:
@@ -36,5 +38,8 @@ def on_conn(s, address):
     master = s
 
 
+def is_alive():
+    return is_socket_alive
+
 if __name__ == '__main__':
-    worker_init(on_receive, "127.0.0.1", 9999, on_conn)
+    worker_init(on_receive, "127.0.0.1", 9999, on_conn, is_alive=is_alive)
