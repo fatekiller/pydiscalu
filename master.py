@@ -20,7 +20,7 @@ def dispatch_job():
         init_conn(job.ds)
         count = get_count(job.sql)
         # 计算每个worker应该负责的记录条数
-        amount = math.ceil(float(count)/len(workers))
+        amount = int(math.ceil(float(count)/len(workers)))
         offset = 0
         for _conn in conns:
             count -= amount
@@ -33,12 +33,12 @@ def dispatch_job():
             job.offset = offset
             offset += size
             new_conn = Conn(reply_gen(job), _conn.conn_socket)
+            print "send job %s,waiting for confirm message" % job.sql
             send_msg(new_conn, Msg(Msg.MSG_JOB, job).get_json_msg())
 
 
 def on_connect_confirm(s, msg):
     global check_sum
-    print 'master receive message :%s' % msg
     lock.acquire()
     check_sum += 1
     lock.release()
@@ -54,13 +54,12 @@ def on_connect_confirm(s, msg):
 def reply_gen(job):
 
     def on_reply(s, msg):
-        print 'master receive message :%s' % msg
         msg = Msg.get_msg(msg)
         if msg.status == Msg.STATUS_SUCCESS:
+            if msg.msg_type == Msg.MSG_JOB_REPLY:
+                print msg.content
             if msg.msg_type == Msg.MSG_RESULT:
                 print msg.content
-                print "job content %s" % job.sql
-                # s.send(Msg(Msg.MSG_JOB, exe_job).get_json_msg())
     return on_reply
 
 

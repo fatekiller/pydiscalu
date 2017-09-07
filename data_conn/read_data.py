@@ -11,6 +11,14 @@ only support mysql now
 '''
 
 
+class Table(object):
+    def __init__(self, sql):
+        m = re.search('select\s+(.*)\s+from\s+(\w+)\s+where(.*)', sql)
+        self.select_target = m.group(1)
+        self.table_name = m.group(2)
+        self.where_rules = m.group(3)
+
+
 def init_conn(ds):
     if ds.ds_type == 'mysql':
         user = ''
@@ -38,12 +46,22 @@ def insert_data():
     conns.put(conn)
 
 
+def execute_with_result_and_count(sql, offset, count):
+    conn = conns.get()
+    cursor = conn.cursor()
+    table = Table(sql)
+    _view = "(select * from %s WHERE %s limit %s,%s) as %s" % \
+            (table.table_name, table.where_rules, str(offset), str(count), table.table_name)
+    sql = "select %s from  %s" % (table.select_target, _view)
+    print sql
+    cursor.execute(sql)
+    return cursor.fetchone()
+
+
 def get_count(sql=""):
     conn = conns.get()
-    m = re.search('from\s+(\w+)\s+(where.*)', sql)
-    table = m.group(1)
-    where = m.group(2)
+    table = Table(sql)
     cursor = conn.cursor()
-    cursor.execute("select count(*) from %s %s" % (table, where))
+    cursor.execute("select count(*) from %s where %s" % (table.table_name, table.where_rules))
     conns.put(conn)
     return cursor.fetchone()[0]

@@ -22,6 +22,9 @@ class Dict2obj(object):
             for key in d:
                 object.__setattr__(self, key, parse_with_type_check(d[key]))
 
+    def __str__(self):
+        return str(self.__d__)
+
 
 class Dict2list(list):
     def __init__(self, d):
@@ -29,6 +32,9 @@ class Dict2list(list):
         if isinstance(d, list):
             for l in d:
                 self.append(parse_with_type_check(l))
+
+    def __str__(self):
+        return str(self.__d__)
 
 
 def obj2json(obj):

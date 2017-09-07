@@ -46,3 +46,12 @@ class Prop(object):
 
     def set_value(self, value):
         self.value = value
+
+
+class Result(object):
+    def __init__(self, msg, value):
+        self.msg = msg
+        self.value = value
+
+    def __str__(self):
+        return "msg: %s, result: %s" % (self.msg, self.value)
