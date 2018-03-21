@@ -54,6 +54,7 @@ def init_s_conn(msg, worker, on_reply=None):
     else:
         s = socket.socket()
         s.connect((worker.address, int(worker.port)))
+        sockets[worker.address+str(worker.port)] = s
     send_http_msg(Conn(on_reply, s), msg)
 
 

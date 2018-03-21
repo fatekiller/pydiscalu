@@ -44,11 +44,10 @@ def on_connect_confirm(s, msg):
     lock.release()
     msg = Msg.get_msg(msg)
 
-    if msg.status == Msg.STATUS_SUCCESS:
-        if msg.msg_type == Msg.MSG_CONNECTED:
-            conns.append(Conn(conn_socket=s))
-            if check_sum == len(workers):
-                dispatch_job()
+    if msg.status == Msg.STATUS_SUCCESS and msg.msg_type == Msg.MSG_CONNECTED:
+        conns.append(Conn(conn_socket=s))
+        if check_sum == len(workers):
+            dispatch_job()
 
 
 def reply_gen(job):

@@ -14,7 +14,6 @@ current_workers = []
 class MyHandler(ContentHandler):
     def startElement(self, name, attrs):
         global current_job
-        global current_job
         global current_name
         global current_workers
         current_name = name
@@ -67,4 +66,3 @@ def parse_job(source_file):
     except IOError as e:
         print e.strerror
     return current_jobs
-
